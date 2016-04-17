@@ -73,6 +73,8 @@ ModelImporter:
     100130: char_astrella_Spine1
     100132: char_astrella_Spine2
     100134: Cylinder
+    100136: Cube
+    100138: Exosceleton
     400000: //RootNode
     400002: char_astrella
     400004: char_astrella_body
@@ -141,11 +143,19 @@ ModelImporter:
     400130: char_astrella_Spine1
     400132: char_astrella_Spine2
     400134: Cylinder
+    400136: Cube
+    400138: Exosceleton
     2300000: Cylinder
+    2300002: Cube
+    2300004: Exosceleton
     3300000: Cylinder
+    3300002: Cube
+    3300004: Exosceleton
     4300000: char_astrella_body
     4300002: char_astrella_helmet
     4300004: Cylinder
+    4300006: Cube
+    4300008: Exosceleton
     7400000: Default Take
     7400002: char_astrella_skeletonAction
     9500000: //RootNode
