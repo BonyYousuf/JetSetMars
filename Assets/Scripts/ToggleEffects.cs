@@ -47,5 +47,9 @@ public class ToggleEffects : MonoBehaviour {
 		{
 			ThirdPersonCharacter.Instance.setJetPack(!ThirdPersonCharacter.Instance.hasJetPack());
 		}
+		else if(Input.GetKeyUp(KeyCode.E))
+		{
+			ThirdPersonCharacter.Instance.setExoskeleton(!ThirdPersonCharacter.Instance.hasExoskeleton());
+		}
 	}
 }

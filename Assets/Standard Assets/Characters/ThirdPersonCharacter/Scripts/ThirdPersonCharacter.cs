@@ -10,12 +10,51 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 	{
 		[SerializeField] float m_MovingTurnSpeed = 360;
 		[SerializeField] float m_StationaryTurnSpeed = 180;
-		[SerializeField] float m_JumpPower = 12f;
+
+		[SerializeField] float m_JumpPower;
+		private const float JumpPower_FOR_FOOT = 6f;
+		private const float JumpPower_FOR_EXOSKELETON = 6f;
+
+		private float lastJumpPressedAt;
+		private const float EXOSKELETON_DOUBLE_JUMP_PRESS_TIME = 0.5f;
+
+		private float jumpLandingTime;
+
+		private float lastJumpedTime;
+		private const float JUMP_ALLOWED_FREQUENCY = 0.3f;
+
+		// if the player has landed few moments ago, his jumping speed should be increased
+		// this variable determines the timeframe for that
+		private const float EXOSKELETON_DOUBLE_JUMP_TIME = 0.5f;
+
+		private bool justLandedFromJump = false;
+
 		[Range(1f, 4f)][SerializeField] float m_GravityMultiplier = 2f;
 		[SerializeField] float m_RunCycleLegOffset = 0.2f; //specific to the character in sample assets, will need to be modified to work with others
+
 		[SerializeField] float m_MoveSpeedMultiplier = 1f;
+		private const float MoveSpeedMultiplier_FOR_FOOT = 1f;
+		private const float MoveSpeedMultiplier_FOR_EXOSKELETON = 1.5f;
+
 		[SerializeField] float m_AnimSpeedMultiplier = 1f;
+
 		[SerializeField] float m_GroundCheckDistance = 0.1f;
+		private const float GroundCheckDistance_FOR_FOOT = 0.3f;
+		private const float GroundCheckDistance_FOR_EXOSKELETON = 0.9f;
+
+		private const float COLLIDER_CENTER_FOR_FOOT = 1.08f;
+		private const float COLLIDER_HEIGHT_FOR_FOOT = 2.16f;
+
+		private const float COLLIDER_CENTER_FOR_EXOSKELETON = 0.87f;
+		private const float COLLIDER_HEIGHT_FOR_EXOSKELETON = 2.4f;
+
+		[SerializeField] bool m_HasExoskeleton = false;
+
+		[SerializeField] GameObject m_ExoskeletonLeft;
+		[SerializeField] GameObject m_ExoskeletonRight;
+
+		[SerializeField] PhysicMaterial m_PhysicsMaterialForFoot;
+		[SerializeField] PhysicMaterial m_PhysicsMaterialForExoskeleton;
 
 		private bool hasJumped = false;
 
@@ -50,6 +89,10 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 		public AudioClip jumpClip;
 		public AudioClip landClip;
 
+		public AudioClip runClipExosKeleton;
+		public AudioClip jumpClipExosKeleton;
+		public AudioClip landClipExosKeleton;
+
 		public static ThirdPersonCharacter Instance;
 
 		void Start()
@@ -68,6 +111,66 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
 			setJetPack(m_HasJetPack, true);
 			m_JetPackAudioSource.volume = JETPACK_MIN_VOLUME;
+
+			setExoskeleton(m_HasExoskeleton, true);
+		}
+
+		public bool hasExoskeleton()
+		{
+			return m_HasExoskeleton;
+		}
+
+		public void setExoskeleton(bool val, bool force = false)
+		{
+			if(m_IsGrounded == false)
+			{
+				if(!force) 
+				{
+					Debug.LogError("Player needs to be grounded before toggling Exoskeleton");
+					return;
+				}
+			}
+
+			if(val)
+			{
+				m_HasExoskeleton = true;
+
+				m_Capsule.height = COLLIDER_HEIGHT_FOR_EXOSKELETON;
+				m_Capsule.center = new Vector3(m_Capsule.center.x, COLLIDER_CENTER_FOR_EXOSKELETON, m_Capsule.center.z);
+
+				m_GroundCheckDistance = GroundCheckDistance_FOR_EXOSKELETON;
+
+				m_JumpPower = JumpPower_FOR_EXOSKELETON;
+
+				m_MoveSpeedMultiplier = MoveSpeedMultiplier_FOR_EXOSKELETON;
+
+				m_Capsule.material = m_PhysicsMaterialForExoskeleton;
+
+				setJetPack(false, true);
+			}
+			else
+			{
+				m_HasExoskeleton = false;
+
+				m_Capsule.height = COLLIDER_HEIGHT_FOR_FOOT;
+				m_Capsule.center = new Vector3(m_Capsule.center.x, COLLIDER_CENTER_FOR_FOOT, m_Capsule.center.z);
+
+				m_GroundCheckDistance = GroundCheckDistance_FOR_FOOT;
+
+				m_JumpPower = JumpPower_FOR_FOOT;
+
+				m_MoveSpeedMultiplier = MoveSpeedMultiplier_FOR_FOOT;
+
+				m_Capsule.material = m_PhysicsMaterialForFoot;
+			}
+
+			m_ExoskeletonLeft.SetActive(val);
+			m_ExoskeletonRight.SetActive(val);
+
+			m_CapsuleHeight = m_Capsule.height;
+			m_CapsuleCenter = m_Capsule.center;
+
+			m_OrigGroundCheckDistance = m_GroundCheckDistance;
 		}
 
 		public bool hasJetPack()
@@ -90,6 +193,8 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			{
 				m_HasJetPack = true;
 				m_Animator.SetLayerWeight(JETPACK_LAYER_INDEX, 1);
+
+				setExoskeleton(false, true);
 			}
 			else
 			{
@@ -181,15 +286,30 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 
 			ApplyExtraTurnRotation();
 
+			if(jump)
+			{
+				lastJumpPressedAt = Time.time;
+			}
+
+
+			if(justLandedFromJump && m_IsGrounded && hasExoskeleton() && lastJumpPressedAt > Time.time - EXOSKELETON_DOUBLE_JUMP_PRESS_TIME)
+			{
+				// if the player has pressed jump button few moments ago when in air. allow it to work now that he is on ground
+				jump = true;
+				//Debug.Log("Delayed Jump");
+			}
+
+			justLandedFromJump = false;
+
 			// control and velocity handling is different when grounded and airborne:
 			if(jump && m_HasJetPack)
 			{
 				addJetPackForce();
 				hasJumped = true;
 			}
-			else if (m_IsGrounded)
+			else if (m_IsGrounded && !hasJumped)
 			{
-				HandleGroundedMovement(crouch, jump);
+				HandleGroundedMovement(crouch, jump, move);
 			}
 			else
 			{
@@ -211,7 +331,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 					transform.Translate(Vector3.forward * m_ForwardAmount * m_JetPackForce * 2f * Time.deltaTime);
 					m_Animator.SetLayerWeight(2, 1);
 
-					Debug.Log(m_Rigidbody.velocity);
+					//Debug.Log(m_Rigidbody.velocity);
 
 					// rotate the player forward a bit when he is using the jet and moving forward
 					Vector3 rotation = new Vector3(move.z == 0 ? 0 : Mathf.Clamp(15f / move.z, -15, 15) , 0, 0);
@@ -277,6 +397,19 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			m_Animator.SetBool("Crouch", m_Crouching);
 			m_Animator.SetBool("OnGround", m_IsGrounded);
 
+			if(hasExoskeleton())
+			{
+				// when player is in idle mode players leg should not move while using Exoskeleton
+				if(m_IsGrounded && m_ForwardAmount == 0 && m_TurnAmount == 0)
+				{
+					m_Animator.SetLayerWeight(3, 1);
+				}
+				else
+				{
+					m_Animator.SetLayerWeight(3, 0);
+				}
+			}
+
 			if (!m_IsGrounded && !m_HasJetPack)
 			{
 				m_Animator.SetFloat("Jump", m_Rigidbody.velocity.y);
@@ -325,18 +458,47 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 		}
 
 
-		void HandleGroundedMovement(bool crouch, bool jump)
+		void HandleGroundedMovement(bool crouch, bool jump, Vector3 moveDirection)
 		{
 			// check whether conditions are right to allow a jump:
-			if (jump && !crouch && m_Animator.GetCurrentAnimatorStateInfo(0).IsName("Grounded"))
+
+			if (jump && !crouch 
+				&& lastJumpedTime < Time.time - JUMP_ALLOWED_FREQUENCY
+				&& (m_Animator.GetCurrentAnimatorStateInfo(0).IsName("Grounded") 
+					|| (hasExoskeleton() && lastJumpPressedAt > Time.time - EXOSKELETON_DOUBLE_JUMP_PRESS_TIME )
+				)
+			)
 			{
 				// jump!
-				m_Rigidbody.velocity = new Vector3(m_Rigidbody.velocity.x, m_JumpPower, m_Rigidbody.velocity.z);
+				//m_Rigidbody.velocity = new Vector3(m_Rigidbody.velocity.x, hasExoskeleton() && jumpLandingTime > Time.time - EXOSKELETON_DOUBLE_JUMP_TIME ? m_JumpPower * 1.25f : m_JumpPower, m_Rigidbody.velocity.z);
+				moveDirection = transform.TransformDirection(moveDirection);
+				//Debug.Log("Direction: " + moveDirection);
+				//Debug.Log("Jumped");
+				lastJumpPressedAt = 0;
+				lastJumpedTime = Time.time;
+
+				float maxHorizontalVelocity = 6.67f * m_MoveSpeedMultiplier;
+
+				Vector3 velocity = new Vector3( maxHorizontalVelocity * moveDirection.x, 
+					hasExoskeleton() && jumpLandingTime > Time.time - EXOSKELETON_DOUBLE_JUMP_TIME ? m_JumpPower * 1.25f : m_JumpPower, 
+					maxHorizontalVelocity * moveDirection.z
+				);
+
+				m_Rigidbody.velocity = velocity;
+
+				//Debug.Log("Velocity: " + m_Rigidbody.velocity);
+
+				/*
+				m_Rigidbody.AddForce(new Vector3(moveDirection.x, 
+					(hasExoskeleton() && jumpLandingTime > Time.time - EXOSKELETON_DOUBLE_JUMP_TIME ? 2f : 1.5f), 
+					moveDirection.z) 
+					* m_JumpPower, ForceMode.VelocityChange);
+				*/
 				m_IsGrounded = false;
 				m_Animator.applyRootMotion = false;
 				m_GroundCheckDistance = 0.1f;
 
-				m_AudioSource.PlayOneShot(jumpClip);
+				m_AudioSource.PlayOneShot(hasExoskeleton() ? jumpClipExosKeleton : jumpClip);
 
 				hasJumped = true;
 			}
@@ -354,7 +516,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 			if(Time.time - lastRunClipPlayedAt > 0.1f)
 			{
 				lastRunClipPlayedAt = Time.time;
-				m_AudioSource.PlayOneShot(runClip, m_ForwardAmount / 3f);	
+				m_AudioSource.PlayOneShot(hasExoskeleton() ? runClipExosKeleton : runClip, m_ForwardAmount / 3f);	
 			}
 		}
 
@@ -387,9 +549,11 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 				if(m_IsGrounded == false)
 				{
 					// player has just landed
-					//Debug.Log("V: " + m_Rigidbody.velocity.y);
+					//Debug.Log("Hit Ground");
 					//Debug.Log("Volume: " + Mathf.Clamp01( Mathf.Abs(m_Rigidbody.velocity.y) / 7f));
-					m_AudioSource.PlayOneShot(landClip, Mathf.Clamp01( Mathf.Abs(m_Rigidbody.velocity.y) / 7f) );
+					m_AudioSource.PlayOneShot(hasExoskeleton() ? landClipExosKeleton : landClip, Mathf.Clamp01( Mathf.Abs(m_Rigidbody.velocity.y) / 7f) );
+
+					jumpLandingTime = Time.time;
 
 					hasJumped = false;
 
@@ -399,6 +563,8 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 					{
 						ps.Stop();
 					}
+
+					justLandedFromJump = true;
 				}
 				m_GroundNormal = hitInfo.normal;
 				m_IsGrounded = true;

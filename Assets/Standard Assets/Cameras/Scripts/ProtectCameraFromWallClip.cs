@@ -111,6 +111,8 @@ namespace UnityStandardAssets.Cameras
                     nearest = m_Hits[i].distance;
                     targetDist = -m_Pivot.InverseTransformPoint(m_Hits[i].point).z;
                     hitSomething = true;
+
+					//Debug.Log(m_Hits[i].collider.name);
                 }
             }
 
