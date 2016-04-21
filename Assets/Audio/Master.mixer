@@ -20,6 +20,7 @@ AudioMixerController:
     - 554a15b59d16b401a92b014475090404
     - 1335463f27ae640778e40183e62c3dd4
     - b8cbad13944a34722a98e20eebacabad
+    - b44ed2d79c2e84935b9e33610421c8fb
     name: View
   m_CurrentViewIndex: 0
   m_TargetSnapshot: {fileID: 24500003}
@@ -35,6 +36,7 @@ AudioMixerGroupController:
   - {fileID: 24336248}
   - {fileID: 24341582}
   - {fileID: 24349628}
+  - {fileID: 24340072}
   m_Volume: 94e1332cfc80b4d62962bf0fe1bd0ad6
   m_Pitch: 873bde58925da4da2855f71f1bf36532
   m_Effects:
@@ -56,6 +58,23 @@ AudioMixerGroupController:
   m_Pitch: 20922e73ed5ed421aa501c6b37b4215f
   m_Effects:
   - {fileID: 24428740}
+  m_UserColorIndex: 0
+  m_Mute: 0
+  m_Solo: 0
+  m_BypassEffects: 0
+--- !u!243 &24340072
+AudioMixerGroupController:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: Segway
+  m_AudioMixer: {fileID: 24100000}
+  m_GroupID: b44ed2d79c2e84935b9e33610421c8fb
+  m_Children: []
+  m_Volume: 0c729b695762a48a696f3c9008004c2b
+  m_Pitch: 806caa1c37ad142d7b164970547940d1
+  m_Effects:
+  - {fileID: 24456486}
   m_UserColorIndex: 0
   m_Mute: 0
   m_Solo: 0
@@ -133,6 +152,19 @@ AudioMixerEffectController:
   m_SendTarget: {fileID: 0}
   m_EnableWetMix: 0
   m_Bypass: 0
+--- !u!244 &24456486
+AudioMixerEffectController:
+  m_ObjectHideFlags: 3
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: 
+  m_EffectID: bc043f14b82a342b0a129528c4d7f766
+  m_EffectName: Attenuation
+  m_MixLevel: f140a071c7223481fab1a8d95dc41a5a
+  m_Parameters: []
+  m_SendTarget: {fileID: 0}
+  m_EnableWetMix: 0
+  m_Bypass: 0
 --- !u!244 &24483890
 AudioMixerEffectController:
   m_ObjectHideFlags: 3
@@ -160,7 +192,7 @@ AudioMixerSnapshotController:
     bf7eb5d08ad61498abe0a41ce2a5c296: 545
     d913ff32a48ca4c2a8bc39d04488a373: -3853
     6749d092fe2f64260aeb8551a1173621: 0.0686
-    c054d292700554613aa70e7cd452261d: 0.04171297
+    c054d292700554613aa70e7cd452261d: -4.560346
     88484ec2c36004fd0a46ac3f25f6b1e5: 0
     7567a953dfca4424d9c775bae847fece: 1.29
     83ce5f4429cb24201b79b09dcd112137: 0.236

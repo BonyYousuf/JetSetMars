@@ -11,30 +11,44 @@ ModelImporter:
     100006: Wheels
     100008: Handle
     100010: Handle.001
+    100012: Wheels.000
+    100014: Wheels.001
+    100016: Wheels.002
     400000: Cube
     400002: Cube.001
     400004: //RootNode
     400006: Wheels
     400008: Handle
     400010: Handle.001
+    400012: Wheels.000
+    400014: Wheels.001
+    400016: Wheels.002
     2300000: Cube
     2300002: Cube.001
     2300004: Wheels
     2300006: //RootNode
     2300008: Handle
     2300010: Handle.001
+    2300012: Wheels.000
+    2300014: Wheels.001
+    2300016: Wheels.002
     3300000: Cube
     3300002: Cube.001
     3300004: Wheels
     3300006: //RootNode
     3300008: Handle
     3300010: Handle.001
+    3300012: Wheels.000
+    3300014: Wheels.001
+    3300016: Wheels.002
     4300000: Cube.001
     4300002: Cube
     4300004: Wheels
     4300006: Handle.001
     4300008: Handle
     4300010: Wheels.001
+    4300012: Wheels.002
+    4300014: Wheels.000
     7400000: Cube.001|CubeAction
     7400002: Cube.001|CubeAction.001
     7400004: Cube.001|SkyCarBodyAction
@@ -87,7 +101,7 @@ ModelImporter:
     isReadable: 1
   meshes:
     lODScreenPercentages: []
-    globalScale: 1
+    globalScale: 100
     meshCompression: 0
     addColliders: 0
     importBlendShapes: 1
