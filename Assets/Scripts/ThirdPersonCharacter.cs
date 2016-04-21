@@ -64,7 +64,7 @@ namespace UnityStandardAssets.Characters.ThirdPerson
 		[SerializeField] ParticleSystem[] m_JetPackParticles;
 		[SerializeField] GameObject m_JetPack;
 		private const int JETPACK_LAYER_INDEX = 1;
-		private const float JETPACK_TOP_REACH = 40;
+		private const float JETPACK_TOP_REACH = 370;
 		private const float JETPACK_MIN_VOLUME = 0.5f;
 		private const float JETPACK_MIN_DOWNWARD_VELOCITY = -5f;
 
