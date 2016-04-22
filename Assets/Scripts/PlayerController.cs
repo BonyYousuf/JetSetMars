@@ -3,6 +3,7 @@ using System.Collections;
 using UnityStandardAssets.ImageEffects;
 using UnityStandardAssets.Characters.ThirdPerson;
 using UnityStandardAssets.Cameras;
+using UnityEngine.SceneManagement;
 
 public class PlayerController : MonoBehaviour {
 
@@ -44,7 +45,11 @@ public class PlayerController : MonoBehaviour {
 
 	// Update is called once per frame
 	void Update () {
-		if(Input.GetKey(KeyCode.LeftControl) && Input.GetKeyUp(KeyCode.B))
+		if(Input.GetKeyUp(KeyCode.Escape))
+		{
+			SceneManager.LoadScene("Main");
+		}
+		else if(Input.GetKey(KeyCode.LeftControl) && Input.GetKeyUp(KeyCode.B))
 		{
 			cam.GetComponent<BloomOptimized>().enabled = !cam.GetComponent<BloomOptimized>().enabled;
 			Debug.Log("Bloom: " + (cam.GetComponent<BloomOptimized>().enabled ? "On" : "Off"));
